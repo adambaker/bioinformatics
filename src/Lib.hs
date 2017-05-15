@@ -1,11 +1,13 @@
 {-# LANGUAGE RankNTypes #-}
 module Lib(
     patternCount,
-    freqWords
+    freqWords,
+    revComp,
+    indexes
     ) where
 
-import Prelude hiding (tail, length, take)
-import Data.ByteString (ByteString, tail, length, isPrefixOf, take)
+import Prelude hiding (tail, length, take, foldl)
+import Data.ByteString.Char8 (ByteString, tail, length, isPrefixOf, take, foldl, pack)
 import Data.List (sortBy)
 import Data.Maybe (fromMaybe)
 import Data.HashTable.Class as H
@@ -47,3 +49,20 @@ mostFreq xs = let
   sorted = sortBy (\(_, x) (_, y) -> y `compare` x) xs 
   highest = snd (head sorted)
   in map fst $ takeWhile (\x -> (snd x) == highest) sorted
+
+comp :: Char -> Char
+comp 'A' = 'T'
+comp 'T' = 'A'
+comp 'C' = 'G'
+comp 'G' = 'C'
+
+revComp :: ByteString -> ByteString
+revComp = pack . foldl (\str c -> (comp c):str) []
+
+indexes :: ByteString -> ByteString -> [Integer]
+indexes pat text = reverse $ loop 0 text []
+  where
+    lenPat = length pat
+    loop x text' idxs
+      | length text' < lenPat = idxs
+      | otherwise = loop (x+1) (tail text') (if isPrefixOf pat text' then x:idxs else idxs)
