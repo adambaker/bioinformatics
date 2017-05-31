@@ -1,11 +1,12 @@
 module Main where
 
-import Lib
+import FreqArray (toStr, countFreqs)
 
 import Prelude hiding (getContents, lines)
-import Data.ByteString.Char8 (getContents, lines, ByteString, pack)
+import Data.ByteString.Char8 (getContents, lines, ByteString, pack, unpack)
 import Data.Set (size)
 import Data.List (intercalate)
 main :: IO ()
-main = getContents >>= 
-  putStrLn . show . size . clumps 9 500 3
+main = do
+  text : k : _ <- fmap lines getContents
+  putStrLn $ toStr $ countFreqs (read $ unpack k) text
