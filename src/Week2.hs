@@ -1,8 +1,13 @@
-module Week2(hamming, minSkew, approxMatches, approxCount, neighbors)
+module Week2(hamming, minSkew, approxMatches, approxCount, neighbors,
+approxPatCount, approxRevCompCount)
 where
 
 import Data.ByteString.Char8 (ByteString)
 import qualified Data.ByteString.Char8 as BS
+import Control.Monad.ST (stToIO)
+import FreqArray(countFreqs, mostFrequent)
+import Data.Array.IArray (assocs)
+import Lib(revComp)
 
 hamming :: ByteString -> ByteString -> Int
 hamming t1 t2 = sum $ BS.zipWith (\x y -> fromEnum (x /= y)) t1 t2
@@ -41,5 +46,12 @@ strNeighbors pat d
       then [BS.head pat : suffix]
       else map (:suffix) bases
 
-neighbors :: ByteString -> Int -> [ByteString]
-neighbors pat d = map BS.pack $ strNeighbors pat d
+neighbors :: Int -> ByteString -> [ByteString]
+neighbors d pat = map BS.pack $ strNeighbors pat d
+
+approxPatCount :: Int -> Int -> ByteString -> [ByteString]
+approxPatCount k d genome = mostFrequent $ countFreqs (neighbors d) k genome
+
+approxRevCompCount :: Int -> Int -> ByteString -> [ByteString]
+approxRevCompCount k d text = mostFrequent $ countFreqs neighRevComp k text
+  where neighRevComp t = neighbors d t ++ neighbors d (revComp t)

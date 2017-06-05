@@ -1,9 +1,9 @@
 {-# LANGUAGE RankNTypes #-}
-module FreqArray(FreqArray, new, inc, toStr, countFreqs)
+module FreqArray(FreqArray, new, inc, toStr, countFreqs, mostFrequent)
 where
 
 import Prelude hiding (max)
-import Data.Array.IArray (elems)
+import Data.Array.IArray (elems, assocs)
 import Data.Array.Unboxed (UArray)
 import Data.Array.MArray (newArray, readArray, writeArray)
 import Data.Array.ST (STUArray, runSTUArray)
@@ -11,6 +11,7 @@ import Data.ByteString.Char8 (ByteString)
 import qualified Data.ByteString.Char8 as BS
 import Control.Monad.ST (ST, runST)
 import Data.List (intercalate)
+import Debug.Trace (traceShowId)
 
 data FreqArray s = FreqArray {patLen :: Int, freqs :: STUArray s Int Int}
 type FreqST s = ST s (FreqArray s)
@@ -24,17 +25,28 @@ inc (FreqArray k a) kmer = do
   count <- readArray a i
   writeArray a i $ count+1
 
-countFreqs :: Int -> ByteString -> FreqST s
-countFreqs k text = do
+countFreqs :: (ByteString -> [ByteString]) -> Int -> ByteString -> FreqST s
+countFreqs neighbors k text = do
   freqs <- new k
   let loop t
         | BS.length t < k = return ()
-        | otherwise = inc freqs (BS.take k t) >> loop (BS.tail t)
+        | otherwise = mapM_ (inc freqs) (neighbors $ BS.take k t) >> loop (BS.tail t)
   loop text
   return freqs
 
 toStr :: (forall s. FreqST s) -> String
-toStr stA = (intercalate " " . map show . elems) (runSTUArray (fmap freqs stA))
+toStr stA = (intercalate " " . map show . elems) (runSTUArray $ fmap freqs stA)
+
+mostFrequent :: (forall s. FreqST s) -> [ByteString]
+mostFrequent stA = let
+  toPat :: Int -> ByteString
+  toPat = intToPattern (runST $ fmap patLen stA)
+  step :: (Int, [Int]) -> (Int, Int) -> (Int, [Int])
+  step last@(lastCount, is) (i, count)
+    | count == lastCount = (count, i:is)
+    | count > lastCount = (count, [i])
+    | otherwise = last
+  in map toPat . snd $ foldl step (0, []) (assocs $ runSTUArray $ fmap freqs stA)
 
 baseToInt :: Char -> Int
 baseToInt 'A' = 0

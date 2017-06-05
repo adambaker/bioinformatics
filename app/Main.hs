@@ -9,4 +9,4 @@ import Data.List (intercalate)
 main :: IO ()
 main = do
   text : k : _ <- fmap lines getContents
-  putStrLn $ toStr $ countFreqs (read $ unpack k) text
+  putStrLn $ toStr $ countFreqs return (read $ unpack k) text
