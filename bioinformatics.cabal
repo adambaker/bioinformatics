@@ -16,7 +16,7 @@ cabal-version:       >=1.10
 library
   hs-source-dirs:      src
   default-extensions: OverloadedStrings
-  exposed-modules:     Lib, Week2, FreqArray
+  exposed-modules:     Lib, Week2, Week3, FreqArray
   build-depends:       base >= 4.7 && < 5, bytestring, hashtables, containers,
                        array
   default-language:    Haskell2010

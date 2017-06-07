@@ -4,7 +4,6 @@ where
 
 import Data.ByteString.Char8 (ByteString)
 import qualified Data.ByteString.Char8 as BS
-import Control.Monad.ST (stToIO)
 import FreqArray(countFreqs, mostFrequent)
 import Data.Array.IArray (assocs)
 import Lib(revComp)

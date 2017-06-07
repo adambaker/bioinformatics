@@ -1,5 +1,6 @@
 {-# LANGUAGE RankNTypes #-}
-module FreqArray(FreqArray, new, inc, toStr, countFreqs, mostFrequent)
+module FreqArray(FreqArray, new, inc, toStr, countFreqs, mostFrequent,
+intToPattern)
 where
 
 import Prelude hiding (max)
